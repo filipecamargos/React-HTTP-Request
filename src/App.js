@@ -1,64 +1,78 @@
 import React, { useState, useEffect, useCallback } from "react";
 
 import MoviesList from "./components/MoviesList";
+import AddMovie from "./components/AddMovie";
 import "./App.css";
+
+import {config} from './config';
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  //Since function holds a diferent space in memory every time like a object
-  //it is important to useCallBack so it is not rehandle everytime
-  const fecthMovieHandler = useCallback(async () => {
+  //useEffect is only called on the update of the second argument, since
+  //there is an empty array that never changes, it will handle the first
+  //time the app is loaded and never again
+  const fetchMoviesHandler = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-
     try {
       const response = await fetch("https://swapi.dev/api/films/");
-
       if (!response.ok) {
-        throw new Error("Somthing wrong with the reponse");
+        throw new Error("Something went wrong!");
       }
 
       const data = await response.json();
 
-      const transformMovies = data.results.map((movie) => {
+      const transformedMovies = data.results.map((movieData) => {
         return {
-          id: movie.episode_id,
-          title: movie.title,
-          openingText: movie.opening_crawl,
-          releaseDate: movie.release_date,
+          id: movieData.episode_id,
+          title: movieData.title,
+          openingText: movieData.opening_crawl,
+          releaseDate: movieData.release_date,
         };
       });
-      setMovies(transformMovies);
-      setIsLoading(false);
+      setMovies(transformedMovies);
     } catch (error) {
-      setIsLoading(false);
       setError(error.message);
     }
+    setIsLoading(false);
   }, []);
 
-  //useEffect is only called on the update of the second argument, since
-  //there is an empty array that never changes, it will handle the first
-  //time the app is loaded and never again
+  //Since function holds a diferent space in memory every time like a object
+  //it is important to useCallBack so it is not rehandle everytime
   useEffect(() => {
-    fecthMovieHandler();
-  }, [fecthMovieHandler]);
+    fetchMoviesHandler();
+  }, [fetchMoviesHandler]);
+
+  function addMovieHandler(movie) {
+    console.log(movie);
+  }
+
+  let content = <p>Found no movies.</p>;
+
+  if (movies.length > 0) {
+    content = <MoviesList movies={movies} />;
+  }
+
+  if (error) {
+    content = <p>{error}</p>;
+  }
+
+  if (isLoading) {
+    content = <p>Loading...</p>;
+  }
 
   return (
     <React.Fragment>
       <section>
-        <button onClick={fecthMovieHandler}>Fetch Movies</button>
+        <AddMovie onAddMovie={addMovieHandler} />
       </section>
       <section>
-        {!isLoading && movies.length > 0 && <MoviesList movies={movies} />}
-        {!isLoading && movies.length === 0 && !error && (
-          <p>No Movies Found Try to Fetch!</p>
-        )}
-        {isLoading && <p>Loading...</p>}
-        {!isLoading && error && <p>{error}</p>}
+        <button onClick={fetchMoviesHandler}>Fetch Movies</button>
       </section>
+      <section>{content}</section>
     </React.Fragment>
   );
 }
