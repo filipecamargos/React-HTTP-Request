@@ -2,7 +2,7 @@
 <h1>React HTTP Request Demo</h1>
 
 <ol>
-  <li><h2>Download the files</h2></li>
-  <li><h2>Run npm intall</h2></li>
-  <li><h2>Run npm start</h2></li>
+  <h2><li>Download the files</li></h2>
+  <h2><li>Run npm intall</li></h2>
+  <h2><li>Run npm start</li></h2>
 </ol>
